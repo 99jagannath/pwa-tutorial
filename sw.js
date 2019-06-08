@@ -1,42 +1,41 @@
 const staticCacheName = 'site-static-v2';
-const dynamicCacheName = 'site-dynamic-v1';
-const assets = [
-  '/',
-  '/index.html',
-  '/js/app.js',
-  '/js/ui.js',
-  '/js/materialize.min.js',
-  '/css/styles.css',
-  '/css/materialize.min.css',
-  '/img/dish.png',
+const dynamicCacheName = 'site-dynamic-v1'
+const assets=[
+  '/foody/',
+  '/foody/index.html',
+  '/foody/pages/fallback.html',
+  '/foody/manifest.json',
+  '/foody/app.js',
+  '/foody/js/ui.js',
+  '/foody/js/materialize.min.js',
+  '/foody/css/materialize.min.css',
+  '/foody/css/styles.css',
+  '/foody/img/dish.png',
   'https://fonts.googleapis.com/icon?family=Material+Icons',
-  'https://fonts.gstatic.com/s/materialicons/v47/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2',
-  '/pages/fallback.html'
+  'https://fonts.gstatic.com/s/materialicons/v47/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2'
 ];
 
-// cache size limit function
-const limitCacheSize = (name, size) => {
-  caches.open(name).then(cache => {
-    cache.keys().then(keys => {
-      if(keys.length > size){
-        cache.delete(keys[0]).then(limitCacheSize(name, size));
-      }
-    });
-  });
-};
+ const limitCachesize=(name,size)=>{
+ 	caches.open(name).then(cache=>{
+ 		cache.keys().then(keys=>{
+ 			if(keys.length>size){
+ 				cache.delete(key[0]).then(limitCachesize(name,size));
+ 			}
+ 		});
+ 	});
+ };
 
-// install event
 self.addEventListener('install', evt => {
-  //console.log('service worker installed');
-  evt.waitUntil(
-    caches.open(staticCacheName).then((cache) => {
-      console.log('caching shell assets');
-      cache.addAll(assets);
-    })
-  );
-});
 
-// activate event
+  evt.waitUntil(
+        caches.open(staticCacheName).then(cache=>{
+        	console.log('caching all assets');
+        	cache.addAll(assets);
+        })
+  	);
+
+});
+//cheagking
 self.addEventListener('activate', evt => {
   //console.log('service worker activated');
   evt.waitUntil(
@@ -58,15 +57,14 @@ self.addEventListener('fetch', evt => {
       return cacheRes || fetch(evt.request).then(fetchRes => {
         return caches.open(dynamicCacheName).then(cache => {
           cache.put(evt.request.url, fetchRes.clone());
-          // check cached items size
-          limitCacheSize(dynamicCacheName, 15);
+          limitCachesize(dynamicCacheName,3);
           return fetchRes;
         })
       });
-    }).catch(() => {
-      if(evt.request.url.indexOf('.html') > -1){
-        return caches.match('/pages/fallback.html');
-      } 
+    }).catch(()=>{
+    	if(evt.request.url.indexOf('.html')>-1){
+    		return caches.match('/pages/fallback.html');
+    	}
     })
   );
 });
